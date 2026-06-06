@@ -1,0 +1,11 @@
+# Environment files
+PatchReportBuilder/.env
+
+# Python cache files
+**/__pycache__/
+**/.pytest_cache/
+*.pyc
+
+# IDE files
+.vscode/
+.idea/
