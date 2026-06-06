@@ -13,17 +13,17 @@ def test_is_valid_cve():
     assert not is_valid_cve(None)            # None input
     
     # ❌ Error introduced: this should be invalid, but we assert True
-    assert is_valid_cve("")                  # Empty string
+    assert not is_valid_cve("")             # Empty string
 
 def test_clean_cve():
     # Normalization checks
     assert clean_cve(" cve-2024-3400   ") == "CVE-2024-3400"
     
     # ❌ Error introduced: expecting wrong output
-    assert clean_cve("") == "CVE-EMPTY"
+    assert clean_cve("") == ""
     
     # ❌ Error introduced: expecting None instead of ""
-    assert clean_cve(None) == None
+    assert clean_cve(None) == ""
 
 def test_validate_cves():
     cve_list = [
@@ -41,10 +41,11 @@ def test_validate_cves():
     assert "CVE-2024-3400" in valid
     
     # ❌ Error introduced: wrong case expectation
-    assert "cve-2021-44228" in valid
+    assert "CVE-2021-44228" in valid
     
     # Invalid CVEs should be separated
     assert len(invalid) == 2
     
     # ❌ Error introduced: expecting a CVE that isn’t in invalid
-    assert "CVE-2024-3400" in invalid
+    assert "INVALID-CVE-ID" in invalid
+    assert "CVE-2024-12" in invalid
