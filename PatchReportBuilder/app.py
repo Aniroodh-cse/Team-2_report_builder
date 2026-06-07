@@ -99,7 +99,7 @@ st.sidebar.markdown("---")
 
 # Clear cache utilities
 if st.sidebar.button("🗑️ Clear Local NVD Cache"):
-    cache_path = os.path.join(os.getcwd(), "input", "nvd_cache.json")
+    cache_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "input", "nvd_cache.json")
     if os.path.exists(cache_path):
         try:
             os.remove(cache_path)
@@ -210,7 +210,7 @@ if valid_cves:
                 ai_pbar.progress((idx) / total_top)
                 ai_progress_text.text(f"Analyzing {cve_id} with Gemini ({idx + 1}/{total_top})...")
                 
-                analysis = ai_engine.analyze_cve(item) or {}
+                analysis = ai_engine.analyze_cve(item)
                 ai_analyses[cve_id] = analysis
                 
             ai_pbar.progress(1.0)
@@ -224,10 +224,163 @@ if valid_cves:
         with st.spinner("Compiling downloadable reports..."):
             markdown_report = generate_markdown_report(stats, top_20, ai_analyses, exec_summary)
             
-            pdf_path = os.path.join(os.getcwd(), "output", "report.pdf")
+            pdf_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output", "report.pdf")
             generate_pdf_report(stats, top_20, ai_analyses, exec_summary, pdf_path)
             
             # Write markdown file locally too
-            md_path = os.path.join(os.getcwd(), "output", "report.md")
+            md_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output", "report.md")
             os.makedirs(os.path.dirname(md_path), exist_ok=True)
             with open(md_path, "w", encoding="utf-8") as f:
+                f.write(markdown_report)
+
+        # Save to Session State
+        st.session_state.analysis_results = {
+            "stats": stats,
+            "top_20": top_20,
+            "ai_analyses": ai_analyses,
+            "executive_summary": exec_summary,
+            "markdown_report": markdown_report,
+            "pdf_path": pdf_path
+        }
+        
+        # Trigger page refresh to display results
+        st.rerun()
+
+# ----------------- DISPLAY RESULTS -----------------
+if st.session_state.analysis_results is not None:
+    results = st.session_state.analysis_results
+    stats = results["stats"]
+    top_20 = results["top_20"]
+    ai_analyses = results["ai_analyses"]
+    exec_summary = results["executive_summary"]
+    markdown_report = results["markdown_report"]
+    pdf_path = results["pdf_path"]
+    
+    st.markdown("---")
+    st.header("🎯 Dashboard & Insights")
+    
+    # C. SUMMARY STATISTICS
+    col_t, col_c, col_h, col_m, col_l = st.columns(5)
+    
+    with col_t:
+        st.markdown(
+            f'<div class="metric-card"><div class="metric-value">{stats["Total"]}</div><div class="metric-label">Total CVEs</div></div>',
+            unsafe_allow_html=True
+        )
+    with col_c:
+        st.markdown(
+            f'<div class="metric-card" style="border-top-color: {SEVERITY_COLORS["Critical"]}"><div class="metric-value" style="color: {SEVERITY_COLORS["Critical"]}">{stats["Critical"]}</div><div class="metric-label">Critical</div></div>',
+            unsafe_allow_html=True
+        )
+    with col_h:
+        st.markdown(
+            f'<div class="metric-card" style="border-top-color: {SEVERITY_COLORS["High"]}"><div class="metric-value" style="color: {SEVERITY_COLORS["High"]}">{stats["High"]}</div><div class="metric-label">High</div></div>',
+            unsafe_allow_html=True
+        )
+    with col_m:
+        st.markdown(
+            f'<div class="metric-card" style="border-top-color: {SEVERITY_COLORS["Medium"]}"><div class="metric-value" style="color: {SEVERITY_COLORS["Medium"]}">{stats["Medium"]}</div><div class="metric-label">Medium</div></div>',
+            unsafe_allow_html=True
+        )
+    with col_l:
+        st.markdown(
+            f'<div class="metric-card" style="border-top-color: {SEVERITY_COLORS["Low"]}"><div class="metric-value" style="color: {SEVERITY_COLORS["Low"]}">{stats["Low"]}</div><div class="metric-label">Low</div></div>',
+            unsafe_allow_html=True
+        )
+        
+    st.ln = st.markdown("<br>", unsafe_allow_html=True) # visual spacer
+    
+    # 9. VISUALIZATIONS (PLOTLY CHARTS SIDE BY SIDE)
+    col_chart1, col_chart2 = st.columns(2)
+    with col_chart1:
+        pie_fig = create_severity_pie(stats)
+        st.plotly_chart(pie_fig, use_container_width=True)
+    with col_chart2:
+        bar_fig = create_severity_bar(stats)
+        st.plotly_chart(bar_fig, use_container_width=True)
+        
+    st.markdown("---")
+    
+    # D. TOP 20 RISK TABLE
+    st.subheader("📊 Top 20 Risk Matrix")
+    
+    # Convert Top 20 to a formatted Pandas DataFrame
+    df_rows = []
+    for item in top_20:
+        df_rows.append({
+            "Rank": item["Rank"],
+            "CVE ID": item["CVE_ID"],
+            "Severity": item["Severity"],
+            "CVSS Score": item["CVSS_Score"],
+            "Published Date": item["Published_Date"],
+            "Status": item["Status"]
+        })
+        
+    df = pd.DataFrame(df_rows)
+    st.dataframe(df.set_index("Rank"), use_container_width=True)
+    
+    st.markdown("---")
+    
+    # E. EXECUTIVE SUMMARY & DETAILS TAB
+    tab_summary, tab_details = st.tabs(["📝 Executive Summary", "🔍 Detailed CVE Deep Dive"])
+    
+    with tab_summary:
+        st.markdown(exec_summary)
+        
+    with tab_details:
+        st.markdown("Below is the detailed vulnerability analysis enriched by NVD and interpreted by Gemini LLM:")
+        for item in top_20:
+            cve_id = item["CVE_ID"]
+            analysis = ai_analyses.get(cve_id, {})
+            
+            severity_badge_color = SEVERITY_COLORS.get(item["Severity"], "#64748b")
+            
+            with st.expander(f"{item['Rank']}. {cve_id} — CVSS: {item['CVSS_Score']} ({item['Severity']})"):
+                st.markdown(f"**Description:** {item['Description']}")
+                
+                # Layout the AI columns
+                c_imp, c_exp = st.columns(2)
+                with c_imp:
+                    st.info(f"💼 **Business Impact**\n\n{analysis.get('business_impact', 'N/A')}")
+                with c_exp:
+                    st.success(f"👥 **Executive-Friendly Explanation**\n\n{analysis.get('executive_explanation', 'N/A')}")
+                    
+                c_rem, c_pri = st.columns(2)
+                with c_rem:
+                    st.warning(f"🔧 **Recommended Remediation**\n\n{analysis.get('remediation', 'N/A')}")
+                with c_pri:
+                    st.error(f"⚖️ **Priority Justification**\n\n{analysis.get('priority_justification', 'N/A')}")
+                    
+                if item.get("References"):
+                    st.markdown("**References:**")
+                    for r in item["References"][:4]:
+                        st.markdown(f"- [{r}]({r})")
+
+    st.markdown("---")
+    
+    # F. DOWNLOAD SECTION
+    st.subheader("📥 Export Reports")
+    col_dl1, col_dl2 = st.columns(2)
+    
+    with col_dl1:
+        st.download_button(
+            label="Download Markdown Report (.md)",
+            data=markdown_report,
+            file_name="Vulnerability_Patch_Report.md",
+            mime="text/markdown",
+            use_container_width=True
+        )
+        
+    with col_dl2:
+        if os.path.exists(pdf_path):
+            with open(pdf_path, "rb") as pdf_file:
+                pdf_bytes = pdf_file.read()
+            st.download_button(
+                label="Download PDF Report (.pdf)",
+                data=pdf_bytes,
+                file_name="Vulnerability_Patch_Report.pdf",
+                mime="application/pdf",
+                use_container_width=True
+            )
+        else:
+            st.error("PDF Report file not found. Please re-run analysis.")
