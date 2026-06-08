@@ -1,0 +1,131 @@
+{
+  "scan_info": {
+    "scan_name": "Enterprise Monthly Vulnerability Assessment",
+    "scan_date": "2026-06-01",
+    "scanner": "Enterprise Security Scanner",
+    "target_environment": "Production",
+    "total_assets": 20
+  },
+  "vulnerabilities": [
+    {
+      "host": "192.168.1.10",
+      "asset_name": "Firewall",
+      "asset_owner": "Network Team",
+      "cve_id": "CVE-2024-3400"
+    },
+    {
+      "host": "192.168.1.11",
+      "asset_name": "Load Balancer",
+      "asset_owner": "Network Team",
+      "cve_id": "CVE-2024-21762"
+    },
+    {
+      "host": "192.168.1.20",
+      "asset_name": "Linux Application Server",
+      "asset_owner": "Infrastructure Team",
+      "cve_id": "CVE-2024-3094"
+    },
+    {
+      "host": "192.168.1.21",
+      "asset_name": "Authentication Server",
+      "asset_owner": "Infrastructure Team",
+      "cve_id": "CVE-2024-27198"
+    },
+    {
+      "host": "192.168.1.22",
+      "asset_name": "Domain Controller",
+      "asset_owner": "Infrastructure Team",
+      "cve_id": "CVE-2023-3519"
+    },
+    {
+      "host": "192.168.1.30",
+      "asset_name": "Web Server 01",
+      "asset_owner": "DevOps Team",
+      "cve_id": "CVE-2023-44487"
+    },
+    {
+      "host": "192.168.1.31",
+      "asset_name": "Web Server 02",
+      "asset_owner": "DevOps Team",
+      "cve_id": "CVE-2023-4863"
+    },
+    {
+      "host": "192.168.1.32",
+      "asset_name": "API Gateway",
+      "asset_owner": "DevOps Team",
+      "cve_id": "CVE-2024-23897"
+    },
+    {
+      "host": "192.168.1.40",
+      "asset_name": "Database Server 01",
+      "asset_owner": "Database Team",
+      "cve_id": "CVE-2024-2961"
+    },
+    {
+      "host": "192.168.1.41",
+      "asset_name": "Database Server 02",
+      "asset_owner": "Database Team",
+      "cve_id": "CVE-2024-6387"
+    },
+    {
+      "host": "192.168.1.50",
+      "asset_name": "Jenkins Server",
+      "asset_owner": "DevOps Team",
+      "cve_id": "CVE-2024-4577"
+    },
+    {
+      "host": "192.168.1.51",
+      "asset_name": "Git Server",
+      "asset_owner": "DevOps Team",
+      "cve_id": "CVE-2024-32002"
+    },
+    {
+      "host": "192.168.1.60",
+      "asset_name": "VPN Gateway",
+      "asset_owner": "Security Team",
+      "cve_id": "CVE-2024-1086"
+    },
+    {
+      "host": "192.168.1.61",
+      "asset_name": "Email Server",
+      "asset_owner": "Infrastructure Team",
+      "cve_id": "CVE-2024-21413"
+    },
+    {
+      "host": "192.168.1.70",
+      "asset_name": "HR Application",
+      "asset_owner": "Application Team",
+      "cve_id": "CVE-2024-1709"
+    },
+    {
+      "host": "192.168.1.71",
+      "asset_name": "Finance Application",
+      "asset_owner": "Application Team",
+      "cve_id": "CVE-2024-24919"
+    },
+    {
+      "host": "192.168.1.80",
+      "asset_name": "Remote Access Appliance",
+      "asset_owner": "Security Team",
+      "cve_id": "CVE-2024-3273"
+    },
+    {
+      "host": "192.168.1.81",
+      "asset_name": "Storage Server",
+      "asset_owner": "Infrastructure Team",
+      "cve_id": "CVE-2024-23222"
+    },
+    {
+      "host": "192.168.1.90",
+      "asset_name": "Monitoring Server",
+      "asset_owner": "Operations Team",
+      "cve_id": "CVE-2024-21887"
+    },
+    {
+      "host": "192.168.1.91",
+      "asset_name": "Backup Server",
+      "asset_owner": "Operations Team",
+      "cve_id": "CVE-2024-20674"
+    }
+  ]
+}
